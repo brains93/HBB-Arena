@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.8-slim-buster
+
+WORKDIR /IBB-api
+EXPOSE 8000
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+
+COPY . .
+
+
+# Install necessary packages for GPIO access
+RUN apt-get update && apt-get install -y \
+    python3-rpi.gpio
+
+# Grant access to GPIO devices
+RUN groupadd -g 998 gpio && \
+    usermod -a -G gpio root && \
+    chown root.gpio /dev/gpiomem && \
+    chmod g+rw /dev/gpiomem
+
+# Set the container user to root
+USER root
+
+CMD [ "uvicorn", "api:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
