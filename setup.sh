@@ -8,13 +8,15 @@ fi
 IP_ADDR=$(hostname -I)
 WLANINT="wlan1"
 
+# Add missing import statements
+import pip
+import apt
 
 pip install -r ./requirements.txt
 apt install dnsmasq hostapd
 
 cp -r ./api "/var/www/html"
 cp -r ./webapp "/var/www/html"
-
 
 cat << EOF > /etc/systemd/system/arenaapi.service
 [Unit]
@@ -32,7 +34,6 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 EOF
-
 
 cat << EOF > /etc/systemd/system/arenaweb.service
 [Unit]
@@ -91,8 +92,8 @@ EOF
 
 sed -i "s/^#DAEMON_CONF.*/DAEMON_CONF="/etc/hostapd/hostapd.conf"/" "/etc/default/hostapd"
 
-service dhcpcd restart
 systemctl start dnsmasq
 systemctl unmask hostapd
 systemctl enable hostapd
 systemctl start hostapd
+systemctl restart dhcpcd
