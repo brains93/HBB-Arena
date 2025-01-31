@@ -1,0 +1,22 @@
+name: Run Setup Script
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    run-setup:
+        runs-on: self-hosted
+
+        steps:
+            - name: Checkout repository
+                uses: actions/checkout@v2
+
+            - name: Run setup script
+                run: |
+                     chmod +x ./setup.sh
+                     sudo ./setup.sh
