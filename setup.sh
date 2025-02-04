@@ -74,7 +74,7 @@ EOF
 cat << EOF > /etc/hostapd/hostapd.conf
 country_code=GB
 interface=$WLANINT
-ssid=IBB_Arena
+ssid=HBB_Arena
 channel=9
 auth_algs=1
 wpa=2
