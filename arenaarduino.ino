@@ -1,8 +1,8 @@
 #include <FastLED.h>
 
 
-#define DATA_PIN 23
-#define CLOCK_PIN 22
+#define DATA_PIN A4
+#define CLOCK_PIN A5
 
 // #define PIN            6  // Pin number to which the data input of the NeoPixel strip is connected
 #define NUM_LEDS     30 // Number of LEDs in the strip

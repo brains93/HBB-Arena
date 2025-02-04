@@ -2,8 +2,10 @@ from time import sleep
 import RPi.GPIO as GPIO
 import sys
 import logging
+import threading
 
 logging.basicConfig(filename='/var/log/arenaapi.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(levelname)-2s %(message)s',  datefmt='%Y-%m-%d %H:%M:%S')
+
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(11, GPIO.OUT) #Flipper pin
 GPIO.setup(13, GPIO.OUT) #Spinner pin
@@ -11,6 +13,8 @@ GPIO.setup(15, GPIO.OUT) #Pit pin
 GPIO.setup(19, GPIO.OUT) #LED mid pin
 GPIO.setup(21, GPIO.OUT) #LED start pin
 GPIO.setup(23, GPIO.OUT) #LED end pin
+# GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #Door sensor pin
+GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #flipper press sensor pin
 
 active_flag = 'active_flag.txt' #file where weapon active flag is stored, 1=weapons active 0=weapons inactive, this is also used to break the match loop
 
@@ -89,3 +93,19 @@ def matchtimer():
     spinner(False)
     stopmatch()
     logging.info('match ended')
+
+
+def flipper_button_listener():
+    logging.info('flipper button listener started')
+
+    while True:
+        if GPIO.input(40) == GPIO.HIGH:
+            logging.info('flipper button pressed')
+            flipper()
+            sleep(0.1)  # debounce delay
+
+# Start the background thread
+flipper_thread = threading.Thread(target=flipper_button_listener)
+flipper_thread.daemon = True
+flipper_thread.start()
+
