@@ -22,7 +22,7 @@ def flipper():
     flagcheck()
     GPIO.output(11, 1)
     logging.info('flipper triggered')
-    sleep(1)
+    sleep(0.1)
     GPIO.output(11, 0)
 
 def spinner(state):
