@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import sys
 import logging
 import threading
+import random
 
 logging.basicConfig(filename='/var/log/arenaapi.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(levelname)-2s %(message)s',  datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -101,8 +102,13 @@ def flipper_button_listener():
     while True:
         if GPIO.input(40) == GPIO.HIGH:
             logging.info('flipper button pressed')
-            flipper()
-            sleep(0.1)  # debounce delay
+            random_num = random.randint(1, 100)
+            if random_num >= 50:
+                
+                logging.info(f'flipper triggered with random number {random_num}')
+                flipper()
+                sleep(0.1)
+            sleep(1)  # debounce delay
 
 # Start the background thread
 flipper_thread = threading.Thread(target=flipper_button_listener)
