@@ -19,6 +19,9 @@ GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #flipper press sensor pin
 
 # active_flag = 'active_flag.txt' #file where weapon active flag is stored, 1=weapons active 0=weapons inactive, this is also used to break the match loop
 active_flag = False
+door_open = False
+
+
 def flipper():
     if not flagcheck(): return
     GPIO.output(11, 1)
@@ -74,7 +77,10 @@ def flagcheck():
     #     content = file.read()
 
     #     # Check if the content is '0' or '1'
-    if active_flag:
+    if door_open:
+        logging.debug("event fail because door is open")
+        return False
+    elif active_flag:
         logging.debug("match is still active")
         return True
     else:
@@ -118,14 +124,14 @@ def flipper_button_listener():
             sleep(1)  # debounce delay
 
 def door_monitor():
-    global active_flag
+    global door_open
     logging.info('door monitor started')
     while True:
         if GPIO.input(36) == GPIO.LOW:
             logging.info('door opened')
             while GPIO.input(36) == GPIO.LOW:
-                active_flag = False
-            active_flag = True
+                door_open = False
+            door_open = True
         # sleep(1)
 
 # Start the background thread
