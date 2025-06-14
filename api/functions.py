@@ -19,8 +19,11 @@ GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #flipper press sensor pin
 
 # active_flag = 'active_flag.txt' #file where weapon active flag is stored, 1=weapons active 0=weapons inactive, this is also used to break the match loop
 active_flag = False
+door_open = False
+
+
 def flipper():
-    flagcheck()
+    if not flagcheck(): return
     GPIO.output(11, 1)
     logging.info('flipper triggered')
     sleep(0.1)
@@ -28,7 +31,7 @@ def flipper():
 
 def spinner(state):
     if state == True:
-        flagcheck()
+        if not flagcheck(): return
         logging.info('spinner turned on')
         GPIO.output(13, 1)
     else:
@@ -36,26 +39,26 @@ def spinner(state):
         GPIO.output(13, 0)
 
 def pit():
-    flagcheck()
+    if not flagcheck(): return
     logging.info('pit triggered')
     GPIO.output(15, 1)
     sleep(1)
     GPIO.output(15, 0)
 
 def lightstart():
-    flagcheck()
+    if not flagcheck(): return
     GPIO.output(19, 1)
     logging.info('light start')
     GPIO.output(19, 0)
 
 def lightmid():
-    flagcheck()
+    if not flagcheck(): return
     GPIO.output(21, 1)
     logging.info('light mid started')
     GPIO.output(21, 0)
 
 def lightend():
-    flagcheck()
+    if not flagcheck(): return
     GPIO.output(23, 1)
     logging.info('light end started')
     GPIO.output(23, 0)
@@ -74,32 +77,36 @@ def flagcheck():
     #     content = file.read()
 
     #     # Check if the content is '0' or '1'
-    if active_flag:
+    if door_open:
+        logging.debug("event fail because door is open")
+        return False
+    elif active_flag:
         logging.debug("match is still active")
-        return
+        return True
     else:
-        logging.info("match end flag is set ending loop")
-        sys.exit()
+        logging.info("match end flag is set, ending loop")
+        return False
         
 
 def matchtimer():
     global active_flag
-    logging.info('match started')
-    active_flag = True
-    # with open(active_flag, 'w') as file:
-    #     file.write('1')
-    lightstart()
-    sleep(60) #timer till pit opens and spinner turns on
-    #middle of match, weapons activate
-    lightmid()
-    spinner(True)
-    pit()
-    sleep(120) #timer till the end of the match
-    #end of the match
-    lightend()
-    spinner(False)
-    stopmatch()
-    logging.info('match ended')
+    if active_flag == False:
+        logging.info('match started')
+        active_flag = True
+        # with open(active_flag, 'w') as file:
+        #     file.write('1')
+        lightstart()
+        sleep(60) #timer till pit opens and spinner turns on
+        #middle of match, weapons activate
+        lightmid()
+        spinner(True)
+        pit()
+        sleep(120) #timer till the end of the match
+        #end of the match
+        lightend()
+        spinner(False)
+        stopmatch()
+        logging.info('match ended')
 
 
 def flipper_button_listener():
@@ -117,14 +124,14 @@ def flipper_button_listener():
             sleep(1)  # debounce delay
 
 def door_monitor():
-    global active_flag
+    global door_open
     logging.info('door monitor started')
     while True:
         if GPIO.input(36) == GPIO.LOW:
             logging.info('door opened')
             while GPIO.input(36) == GPIO.LOW:
-                active_flag = False
-            active_flag = True
+                door_open = False
+            door_open = True
         # sleep(1)
 
 # Start the background thread
